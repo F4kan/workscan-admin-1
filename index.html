@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli - Coffee Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h1>☕ Admin Giriş</h1>
+        <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Kullanıcı Adı" required>
+            <input type="password" id="loginPassword" placeholder="Şifre" required>
+            <button type="button" onclick="login()">Giriş Yap</button>
+        </form>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer" style="display: none;">
+        <div class="top-bar">
+            <div class="logo-container">
+                <img src="logo-mackbear.png" class="logo" alt="Mackbear Logo">
+                <span class="logo-text">Mackbear Admin</span>
+            </div>
+            <div class="admin-profile" onclick="toggleAdminMenu()">
+                <div class="admin-avatar">A</div>
+                <div class="admin-info">
+                    <div class="admin-name" id="adminName">Admin Barista</div>
+                    <div class="admin-status">● Brewing</div>
+                </div>
+                <div class="admin-menu" id="adminMenu">
+                    <button onclick="logout()">Çıkış Yap</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <ul>
+                <li class="active" onclick="showPage('main')">🏠 Ana Sayfa</li>
+                <li onclick="showPage('qr')">📱 QR Kodlar</li>
+                <li onclick="showPage('istatistik')">📊 İstatistikler</li>
+                <li onclick="showPage('kullanici')">👥 Kullanıcılar</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <div id="main" class="page active">
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Toplam Kullanıcı</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #d4a574, #8b4513);">👥</div>
+                        </div>
+                        <div class="card-value" id="totalUsers">1,247</div>
+                        <div class="card-change positive">+12% bu ay</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Aktif Kullanıcı</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #daa520, #cd853f);">🟢</div>
+                        </div>
+                        <div class="card-value" id="activeUsers">842</div>
+                        <div class="card-change positive">+8% bu hafta</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Toplam Mesai</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #a0522d, #8b4513);">⏰</div>
+                        </div>
+                        <div class="card-value" id="totalShifts">15,638</div>
+                        <div class="card-change positive">+15% bu ay</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Günlük Giriş</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #d2b48c, #daa520);">📈</div>
+                        </div>
+                        <div class="card-value" id="dailyEntries">342</div>
+                        <div class="card-change negative">-3% dün</div>
+                    </div>
+                </div>
+                <div class="recent-activity">
+                    <div class="activity-header">☕ Son Giriş-Çıkışlar</div>
+                    <div class="activity-list" id="recentActivities"></div>
+                </div>
+            </div>
+
+            <div id="qr" class="page hidden">
+                <h2 style="margin-bottom: 30px; font-size: 28px;">📱 QR Kod Yönetimi</h2>
+                <div class="qr-section">
+                    <div class="qr-container">
+                        <h3 style="margin-bottom: 20px;">QR Kod Oluştur</h3>
+                        <p style="margin-bottom: 20px;">Personel giriş-çıkış işlemleri için QR kod oluşturun ve yönetin.</p>
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>QR kod oluşturuluyor...</p>
+                        </div>
+                        <div id="qrContainer">
+                            <img id="qrImage" src="" alt="QR Kod">
+                        </div>
+                        <div class="stats">
+                            <p>📊 Toplam Tarama: <span id="scanCount">0</span></p>
+                            <p>🔄 Yenileme Sayısı: <span id="refreshCount">0</span></p>
+                            <p>🕒 Son Güncelleme: <span id="lastUpdate">-</span></p>
+                            <p>🔢 Aktif QR ID: <span id="currentId">-</span></p>
+                            <p>🎲 QR İçeriği: <span id="qrPreview" style="font-size: 0.8em; color: #6b6b6b;">-</span></p>
+                        </div>
+                        <button onclick="generateNewQR(true)">🔄 QR Kod Yenile</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="istatistik" class="page hidden">
+                <h2 style="margin-bottom: 30px; font-size: 28px;">📊 İstatistikler</h2>
+                <div class="chart-container">
+                    <h3>Günlük Giriş-Çıkış Grafiği</h3>
+                    <canvas id="dailyChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Aktif Personel Dağılımı</h3>
+                    <canvas id="personnelChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Aylık İstatistikler</h3>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <div id="kullanici" class="page hidden">
+                <h2 style="margin-bottom: 30px; font-size: 28px;">👥 Kullanıcı Yönetimi</h2>
+                <form id="addUserForm">
+                    <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+                    <input type="password" id="password" placeholder="Şifre" required>
+                    <input type="email" id="email" placeholder="E-posta" required>
+                    <button type="button" onclick="addUser()">Kullanıcı Ekle</button>
+                </form>
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-posta</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

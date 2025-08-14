@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli - Coffee Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0eee4;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            position: relative;
+            color: #7a7a7a;
+        }
+
+        /* Login Page */
+        .login-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #f0eee4;
+            text-align: center;
+        }
+
+        .login-container.active {
+            display: flex;
+        }
+
+        .login-container h1 {
+            font-size: 2.5em;
+            color: #7a7a7a;
+            margin-bottom: 20px;
+        }
+
+        .login-container form {
+            background: #e5e3d5;
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #d0cec4;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-container input {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 2px solid #d0cec4;
+            border-radius: 10px;
+            background: #f0eee4;
+            color: #7a7a7a;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background: #7a7a7a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .login-container button:hover {
+            background: #6b6b6b;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: #e5e3d5;
+            border-bottom: 2px solid #d0cec4;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+            display: block;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #7a7a7a;
+        }
+
+        .admin-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f0eee4;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #d0cec4;
+        }
+
+        .admin-profile:hover {
+            background: #e5e3d5;
+            transform: translateY(-2px);
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7a7a7a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .admin-info {
+            font-size: 14px;
+        }
+
+        .admin-name {
+            font-weight: 600;
+        }
+
+        .admin-status {
+            font-size: 12px;
+            opacity: 0.8;
+            color: #6b6b6b;
+        }
+
+        .admin-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: #e5e3d5;
+            border: 2px solid #d0cec4;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+        }
+
+        .admin-menu.active {
+            display: block;
+        }
+
+        .admin-menu button {
+            display: block;
+            width: 100%;
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            text-align: left;
+            color: #7a7a7a;
+            cursor: pointer;
+        }
+
+        .admin-menu button:hover {
+            background: #dcdad1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #e5e3d5;
+            border-right: 2px solid #d0cec4;
+            padding: 90px 20px 20px;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar li {
+            background: #f0eee4;
+            padding: 16px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #7a7a7a;
+            font-weight: 500;
+            border: 1px solid #d0cec4;
+        }
+
+        .sidebar li:hover {
+            background: #dcdad1;
+            transform: translateX(8px);
+        }
+
+        .sidebar li.active {
+            background: #dcdad1;
+            border-color: #c4c2b8;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 90px 30px 30px;
+        }
+
+        .page {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .page.hidden {
+            display: none;
+        }
+
+        /* Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #e5e3d5;
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #d0cec4;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #f0eee4;
+            border: 1px solid #d0cec4;
+        }
+
+        .card-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .card-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #6b6b6b;
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: #e5e3d5;
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #d0cec4;
+            margin-bottom: 20px;
+        }
+
+        .activity-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f0eee4;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid #d0cec4;
+        }
+
+        .activity-item:hover {
+            background: #dcdad1;
+        }
+
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7a7a7a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .activity-user {
+            font-weight: 600;
+        }
+
+        /* Forms */
+        form {
+            background: #e5e3d5;
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #d0cec4;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            padding: 12px 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #d0cec4;
+            border-radius: 10px;
+            background: #f0eee4;
+            color: #7a7a7a;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #7a7a7a;
+            background: white;
+        }
+
+        button {
+            background: #7a7a7a;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+        }
+
+        button:hover {
+            background: #6b6b6b;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            background: #e5e3d5;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #d0cec4;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #d0cec4;
+        }
+
+        th {
+            background: #dcdad1;
+            font-weight: 600;
+            color: #7a7a7a;
+        }
+
+        tr:hover {
+            background: #f0eee4;
+        }
+
+        /* QR Section */
+        .qr-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+            padding: 25px;
+            background: #e5e3d5;
+            border-radius: 20px;
+            border: 2px solid #d0cec4;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .qr-container img {
+            max-width: 280px;
+            border: 3px solid #7a7a7a;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            background-color: #f0eee4;
+        }
+
+        .qr-container img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #dcdad1;
+            border-radius: 10px;
+            border: 1px solid #d0cec4;
+        }
+
+        .stats p {
+            margin: 5px 0;
+            color: #7a7a7a;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(122, 122, 122, 0.3);
+            border-top: 4px solid #7a7a7a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .qr-changing {
+            animation: qrPulse 0.5s ease-in-out;
+        }
+
+        @keyframes qrPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Charts */
+        .chart-container {
+            background: #e5e3d5;
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #d0cec4;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+
+        /* Notifications */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .content {
+                margin-left: 200px;
+                padding: 90px 20px 20px;
+            }
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            .qr-section {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .login-container form {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h1>☕ Admin Giriş</h1>
+        <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Kullanıcı Adı" required>
+            <input type="password" id="loginPassword" placeholder="Şifre" required>
+            <button type="button" onclick="login()">Giriş Yap</button>
+        </form>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer" style="display: none;">
+        <div class="top-bar">
+            <div class="logo-container">
+                <img src="https://via.placeholder.com/40?text=Logo" class="logo" alt="Mackbear Logo">
+                <span class="logo-text">Mackbear Admin</span>
+            </div>
+            <div class="admin-profile" onclick="toggleAdminMenu()">
+                <div class="admin-avatar">A</div>
+                <div class="admin-info">
+                    <div class="admin-name" id="adminName">Admin Barista</div>
+                    <div class="admin-status">● Brewing</div>
+                </div>
+                <div class="admin-menu" id="adminMenu">
+                    <button onclick="logout()">Çıkış Yap</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <ul>
+                <li class="active" onclick="showPage('main')">🏠 Ana Sayfa</li>
+                <li onclick="showPage('qr')">📱 QR Kodlar</li>
+                <li onclick="showPage('istatistik')">📊 İstatistikler</li>
+                <li onclick="showPage('kullanici')">👥 Kullanıcılar</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <div id="main" class="page active">
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Toplam Kullanıcı</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #d4a574, #8b4513);">👥</div>
+                        </div>
+                        <div class="card-value" id="totalUsers">1,247</div>
+                        <div class="card-change positive">+12% bu ay</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Aktif Kullanıcı</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #daa520, #cd853f);">🟢</div>
+                        </div>
+                        <div class="card-value" id="activeUsers">842</div>
+                        <div class="card-change positive">+8% bu hafta</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Toplam Mesai</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #a0522d, #8b4513);">⏰</div>
+                        </div>
+                        <div class="card-value" id="totalShifts">15,638</div>
+                        <div class="card-change positive">+15% bu ay</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Günlük Giriş</div>
+                            <div class="card-icon" style="background: linear-gradient(135deg, #d2b48c, #daa520);">📈</div>
+                        </div>
+                        <div class="card-value" id="dailyEntries">342</div>
+                        <div class="card-change negative">-3% dün</div>
+                    </div>
+                </div>
+                <div class="recent-activity">
+                    <div class="activity-header">☕ Son Giriş-Çıkışlar</div>
+                    <div class="activity-list" id="recentActivities"></div>
+                </div>
+            </div>
+
+            <div id="qr" class="page hidden">
+                <h2 style="margin-bottom: 30px; font-size: 28px;">📱 QR Kod Yönetimi</h2>
+                <div class="qr-section">
+                    <div class="qr-container">
+                        <h3 style="margin-bottom: 20px;">QR Kod Oluştur</h3>
+                        <p style="margin-bottom: 20px;">Personel giriş-çıkış işlemleri için QR kod oluşturun ve yönetin.</p>
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>QR kod oluşturuluyor...</p>
+                        </div>
+                        <div id="qrContainer">
+                            <img id="qrImage" src="" alt="QR Kod">
+                        </div>
+                        <div class="stats">
+                            <p>📊 Toplam Tarama: <span id="scanCount">0</span></p>
+                            <p>🔄 Yenileme Sayısı: <span id="refreshCount">0</span></p>
+                            <p>🕒 Son Güncelleme: <span id="lastUpdate">-</span></p>
+                            <p>🔢 Aktif QR ID: <span id="currentId">-</span></p>
+                            <p>🎲 QR İçeriği: <span id="qrPreview" style="font-size: 0.8em; color: #6b6b6b;">-</span></p>
+                        </div>
+                        <button onclick="generateNewQR(true)">🔄 QR Kod Yenile</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="istatistik" class="page hidden">
+                <h2 style="margin-bottom: 30px; font-size: 28px;">📊 İstatistikler</h2>
+                <div class="chart-container">
+                    <h3>Günlük Giriş-Çıkış Grafiği</h3>
+                    <canvas id="dailyChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Aktif Personel Dağılımı</h3>
+                    <canvas id="personnelChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Aylık İstatistikler</h3>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <div id="kullanici" class="page hidden">
+                <h2 style="margin-bottom: 30px; font-size: 28px;">👥 Kullanıcı Yönetimi</h2>
+                <form id="addUserForm">
+                    <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+                    <input type="password" id="password" placeholder="Şifre" required>
+                    <input type="email" id="email" placeholder="E-posta" required>
+                    <button type="button" onclick="addUser()">Kullanıcı Ekle</button>
+                </form>
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-posta</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication
+        let isAuthenticated = false;
+        const users = [
+            { username: 'admin', password: 'admin123', email: 'admin@coffee.com', status: 'active' }
+        ];
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                isAuthenticated = true;
+                document.getElementById('loginContainer').classList.remove('active');
+                document.getElementById('dashboardContainer').style.display = 'block';
+                document.getElementById('adminName').textContent = username;
+                showNotification('Giriş başarılı!', 'success');
+                renderUsers();
+                updateDashboardData();
+            } else {
+                showNotification('Geçersiz kullanıcı adı veya şifre!', 'error');
+            }
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            document.getElementById('dashboardContainer').style.display = 'none';
+            document.getElementById('loginContainer').classList.add('active');
+            document.getElementById('loginForm').reset();
+            showNotification('Çıkış yapıldı!', 'info');
+            document.getElementById('adminMenu').classList.remove('active');
+        }
+
+        function checkAuth() {
+            if (!isAuthenticated) {
+                document.getElementById('loginContainer').classList.add('active');
+                document.getElementById('dashboardContainer').style.display = 'none';
+            } else {
+                document.getElementById('loginContainer').classList.remove('active');
+                document.getElementById('dashboardContainer').style.display = 'block';
+            }
+        }
+
+        // Page Navigation
+        function showPage(pageId) {
+            if (!isAuthenticated) return;
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+                page.classList.add('hidden');
+            });
+            document.querySelectorAll('.sidebar li').forEach(li => {
+                li.classList.remove('active');
+            });
+
+            const selectedPage = document.getElementById(pageId);
+            selectedPage.classList.remove('hidden');
+            setTimeout(() => {
+                selectedPage.classList.add('active');
+            }, 10);
+
+            document.querySelector(`.sidebar li[onclick="showPage('${pageId}')"]`).classList.add('active');
+        }
+
+        // User Management
+        function addUser() {
+            if (!isAuthenticated) return;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+
+            if (!username || !password || !email) {
+                showNotification('Lütfen tüm alanları doldurun!', 'error');
+                return;
+            }
+
+            if (users.find(u => u.username === username)) {
+                showNotification('Bu kullanıcı adı zaten mevcut!', 'error');
+                return;
+            }
+
+            users.push({ username, password, email, status: 'active' });
+            renderUsers();
+            document.getElementById('addUserForm').reset();
+            document.getElementById('totalUsers').textContent = users.length.toLocaleString();
+            showNotification(`${username} kullanıcısı eklendi!`, 'success');
+            updatePersonnelChart();
+        }
+
+        function removeUser(index) {
+            if (!isAuthenticated) return;
+            if (index === 0) {
+                showNotification('Admin kullanıcısı silinemez!', 'error');
+                return;
+            }
+            const user = users[index];
+            users.splice(index, 1);
+            renderUsers();
+            document.getElementById('totalUsers').textContent = users.length.toLocaleString();
+            showNotification(`${user.username} kullanıcısı silindi!`, 'success');
+            updatePersonnelChart();
+        }
+
+        function renderUsers() {
+            const tbody = document.querySelector('#userTable tbody');
+            tbody.innerHTML = '';
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td><span style="color: #daa520;">● ${user.status === 'active' ? 'Aktif' : 'Pasif'}</span></td>
+                    <td><button onclick="removeUser(${index})" ${index === 0 ? 'disabled' : ''}>Sil</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // QR Code Management
+        let qrData = {
+            scanCount: 0,
+            refreshCount: 0,
+            currentId: '',
+            lastUpdate: ''
+        };
+
+        const QR_API_BASE = 'https://api.qrserver.com/v1/create-qr-code/';
+
+        function generateUniqueId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 10000);
+            return `QR-${timestamp}-${random}`;
+        }
+
+        function generateQRContent() {
+            const id = generateUniqueId();
+            const timestamp = new Date().toLocaleString('tr-TR');
+            const randomNum = Math.floor(Math.random() * 999999) + 100000;
+            const sessionId = Date.now() + Math.random().toString(36).substr(2, 9);
+
+            const formats = [
+                `☕ QR Kod #${randomNum}\n⏰ ${timestamp}\n🆔 ${id}\n📊 Tarama: ${qrData.scanCount}\n🔄 Yenileme: ${qrData.refreshCount}\n🎲 Rastgele: ${sessionId}`,
+                `🌟 Dinamik QR - ${randomNum}\n📅 Tarih: ${timestamp}\n🔑 Kimlik: ${id}\n📈 İstatistik: T${qrData.scanCount}/Y${qrData.refreshCount}\n⚡ Oturum: ${sessionId}`,
+                `🚀 QR-${randomNum}\n${timestamp}\nID: ${id}\nTarama/Yenileme: ${qrData.scanCount}/${qrData.refreshCount}\nToken: ${sessionId}`,
+                `📱 QR Kodu\nNumara: ${randomNum}\nZaman: ${timestamp}\nBenzersiz ID: ${id}\nSayaçlar: ${qrData.scanCount}+${qrData.refreshCount}\nHash: ${sessionId}`
+            ];
+
+            const selectedFormat = formats[Math.floor(Math.random() * formats.length)];
+            const scanUrl = `${window.location.origin}${window.location.pathname}?scan=${id}&r=${randomNum}&t=${Date.now()}`;
+
+            return {
+                id: id,
+                content: selectedFormat,
+                url: scanUrl,
+                randomNum: randomNum,
+                sessionId: sessionId
+            };
+        }
+
+        function generateNewQR(isManualRefresh = true) {
+            if (!isAuthenticated) return;
+            const qrImage = document.getElementById('qrImage');
+            const loading = document.getElementById('loading');
+            const qrContainer = document.getElementById('qrContainer');
+
+            loading.style.display = 'block';
+            qrImage.style.opacity = '0.5';
+
+            if (isManualRefresh) {
+                qrData.refreshCount++;
+            }
+
+            const qrInfo = generateQRContent();
+            qrData.currentId = qrInfo.id;
+            qrData.lastUpdate = new Date().toLocaleString('tr-TR');
+
+            const size = 280;
+            const qzone = 2;
+
+            const qrUrl = `${QR_API_BASE}?size=${size}x${size}&data=${encodeURIComponent(qrInfo.content)}&bgcolor=f0eee4&color=7a7a7a&qzone=${qzone}&format=png&ecc=M&margin=0&v=${Date.now()}`;
+
+            qrImage.src = '';
+
+            setTimeout(() => {
+                qrImage.src = qrUrl;
+                qrImage.onload = function() {
+                    loading.style.display = 'none';
+                    qrImage.style.opacity = '1';
+                    qrContainer.classList.add('qr-changing');
+                    setTimeout(() => {
+                        qrContainer.classList.remove('qr-changing');
+                    }, 500);
+                    updateStats();
+                    showNotification('Yeni QR kod oluşturuldu!', 'success');
+                };
+
+                qrImage.onerror = function() {
+                    const fallbackUrl = `${QR_API_BASE}?size=280x280&data=${encodeURIComponent(qrInfo.id + ' - ' + Date.now())}&format=png&color=7a7a7a&bgcolor=f0eee4&v=${Date.now()}`;
+                    qrImage.src = fallbackUrl;
+                    showNotification('QR kod yüklenemedi, yedek oluşturuldu!', 'error');
+                };
+            }, 500);
+        }
+
+        function updateStats() {
+            document.getElementById('scanCount').textContent = qrData.scanCount;
+            document.getElementById('refreshCount').textContent = qrData.refreshCount;
+            document.getElementById('lastUpdate').textContent = qrData.lastUpdate;
+            document.getElementById('currentId').textContent = qrData.currentId;
+
+            const qrInfo = generateQRContent();
+            const preview = qrInfo.content.split('\n')[0];
+            document.getElementById('qrPreview').textContent = preview;
+        }
+
+        function checkForScan() {
+            if (!isAuthenticated) return;
+            const urlParams = new URLSearchParams(window.location.search);
+            const scanId = urlParams.get('scan');
+            if (scanId && scanId !== qrData.currentId) {
+                qrData.scanCount++;
+                generateNewQR(false);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // Dashboard Updates
+        function updateDashboardData() {
+            if (!isAuthenticated) return;
+            const activities = [
+                { name: 'Ahmet Kaya', action: 'Giriş yaptı', time: '2 dakika önce', avatar: 'AK' },
+                { name: 'Mehmet Güner', action: 'Çıkış yaptı', time: '5 dakika önce', avatar: 'MG' },
+                { name: 'Seda Yılmaz', action: 'Giriş yaptı', time: '12 dakika önce', avatar: 'SY' },
+                { name: 'Can Demir', action: 'Çıkış yaptı', time: '18 dakika önce', avatar: 'CD' },
+                { name: 'Elif Aslan', action: 'Giriş yaptı', time: '25 dakika önce', avatar: 'EA' }
+            ];
+
+            const activitiesContainer = document.getElementById('recentActivities');
+            activitiesContainer.innerHTML = '';
+            activities.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = 'activity-item';
+                div.innerHTML = `
+                    <div class="activity-avatar">${activity.avatar}</div>
+                    <div class="activity-content">
+                        <div class="activity-user">${activity.name}</div>
+                        <div class="activity-action">${activity.action}</div>
+                    </div>
+                    <div class="activity-time">${activity.time}</div>
+                `;
+                activitiesContainer.appendChild(div);
+            });
+        }
+
+        // Charts
+        let dailyChart, personnelChart, monthlyChart;
+
+        function initCharts() {
+            // Daily Entries/Exits
+            dailyChart = new Chart(document.getElementById('dailyChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+                    datasets: [
+                        {
+                            label: 'Girişler',
+                            data: [120, 150, 130, 170, 160, 140, 110],
+                            borderColor: '#d4a574',
+                            backgroundColor: 'rgba(212, 165, 116, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Çıkışlar',
+                            data: [100, 130, 110, 150, 140, 120, 90],
+                            borderColor: '#8b4513',
+                            backgroundColor: 'rgba(139, 69, 19, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Günlük Giriş-Çıkışlar', color: '#7a7a7a' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#7a7a7a' } },
+                        x: { ticks: { color: '#7a7a7a' } }
+                    }
+                }
+            });
+
+            // Active Personnel
+            personnelChart = new Chart(document.getElementById('personnelChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Aktif', 'Pasif'],
+                    datasets: [{
+                        data: [users.filter(u => u.status === 'active').length, users.filter(u => u.status !== 'active').length],
+                        backgroundColor: ['#d4a574', '#dcdad1'],
+                        borderColor: '#d0cec4'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Personel Dağılımı', color: '#7a7a7a' }
+                    }
+                }
+            });
+
+            // Monthly Statistics
+            monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz'],
+                    datasets: [{
+                        label: 'Aylık Aktivite',
+                        data: [300, 350, 400, 380, 420, 390],
+                        backgroundColor: '#d4a574',
+                        borderColor: '#d0cec4',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Aylık İstatistikler', color: '#7a7a7a' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#7a7a7a' } },
+                        x: { ticks: { color: '#7a7a7a' } }
+                    }
+                }
+            });
+        }
+
+        function updatePersonnelChart() {
+            personnelChart.data.datasets[0].data = [
+                users.filter(u => u.status === 'active').length,
+                users.filter(u => u.status !== 'active').length
+            ];
+            personnelChart.update();
+        }
+
+        // Notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'rgba(44, 160, 44, 0.95)' : type === 'error' ? 'rgba(214, 40, 40, 0.95)' : 'rgba(44, 24, 16, 0.95)';
+            notification.style.cssText = `
+                position: fixed;
+                top: 90px;
+                right: 30px;
+                background: ${bgColor};
+                color: #f5deb3;
+                padding: 15px 20px;
+                border-radius: 10px;
+                border: 2px solid rgba(210, 180, 140, 0.5);
+                z-index: 9999;
+                backdrop-filter: blur(20px);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = `☕ ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Admin Menu Toggle
+        function toggleAdminMenu() {
+            if (!isAuthenticated) return;
+            const menu = document.getElementById('adminMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            if (isAuthenticated) {
+                updateDashboardData();
+                initCharts();
+                generateNewQR(false);
+                renderUsers();
+                setInterval(checkForScan, 1500);
+                setInterval(updateDashboardData, 30000);
+            }
+            console.log('☕ Coffee Admin Panel loaded successfully!');
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.key === 'r' || e.key === 'R') && isAuthenticated && document.getElementById('qr').classList.contains('active')) {
+                e.preventDefault();
+                generateNewQR(true);
+            }
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && isAuthenticated) {
+                checkForScan();
+            }
+        });
+    </script>
+</body>
+</html>
